@@ -1,0 +1,28 @@
+AIM AND APPROACH 
+
+The aim of the project is to make a UART Protocol circuit. 
+
+The approach with which i handled the project was to take inputs parallelly and then store them temporarily in PISO 4 bit register. The output was then fed to a multiplexer. The selector of the multiplexer were connected to specific continuous D-pattern so that they take data as 0+databit+1 and continue it. As , this will create a 2sec time, for which we have to hold the 0 and 1 bit because after transmitting 4 bits we want to hold for 1 and 0, I set the shift line again with D-pattern 011110 so it we be in load mode for the 2 seconds. 
+After this, the data was sent to SIPO 4 bit register. The register will have data bits after every 4 cycle, 0xxx, b00xx, b1b00x,b3b2b1b00,b3b2b1b0 so I used AND gate, which make all the previous 4 4-bits 0000 and only the 5th bit is send as the final output. The clock for both the PISO AND SIPO register is kept same. 
+
+ 
+SCOPE OF DEVELOPMENT 
+
+Implementing error detection using parity bit, using counters and comparator and then multiplexing it with start, end and parity bit. 
+
+Instead of using AND gates for filtering of the data bits using multiplexer, which can make the 5th bit travel at a specific path.  
+
+Adding more bits. 
+
+
+ISSUES ENCOUNTERED AND METHOD OF SOLVING THEM 
+
+Initially, I set the sequence for load/shift as 01111 instead of 011110, ignoring that their were 2 bits wait instead of 1. It produced wrong output.   
+
+
+
+
+
+
+
+
