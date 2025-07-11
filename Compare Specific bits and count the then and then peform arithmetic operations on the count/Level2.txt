@@ -1,0 +1,29 @@
+AIM AND APPROACH 
+
+The given project aimed to identify specific non overlapping bits from a 64 bits digital sequence and then counting them(i.e. success and failure) separately and then and displaying their difference on the seven segment display. 
+
+The approach that i followed was that I took the 64 bit data, using D-pattern and feed it serially in a 4 bit SIPO D-shift-register. After every 3rd bit so, the 4th bit is the non overlapping 4bits that we need. To filter out the 3 parallel bits in the 4 parallel output, I used AND gates. This was done by generating a continuous D-Pattern 0001.After this, these bits were taken to two comparator ICs: success and failure. next, the output for equal case was taken to a counter. From there, 2's complement was taken for the failure case and then was both the negative failure and success were send to a 4 bit ripple carry adder. The output from this was then sent to the 7 segment decoder and finally to the display. 
+
+
+SCOPE OF DEVELOPMENT
+
+The method of finding the 4 non overlapping bits can be enhanced, because any misalignment in the clock, might lead to transfer of wrong bits, and an overall failure.
+
+Separate counters to measure, cases like delayed
+acknowledgments, corrupted packets, scheduled retries, or idle signals. 
+
+The arithmetic part can be improved by using fast adders like look ahead carry adders instead of ripple carry adder. 
+
+LEDs can be added to indicate failure or success every consecutive 4 bits during run time. 
+
+ 
+ISSUES ENCOUNTERED DURING MAKING 
+
+It was a challenge to figure out how to separate 4 non overlapping bits. Even after a hectic search for a logic circuit, I couldn't find any method to do so. I thought of using a 4:1 demultiplexer and then feeding the selectors with a clock. The 4th output will have one of the 4 bits. Same can be done for the bits of the 4 bit code. The downside of this would be the overall cost of the circuit, so I had to make it simpler.  At the end I came up with the usage of AND or OR gates to perform the task. 
+
+It is important to align all the clocks in this circuit, or we wont get the correct result.  
+
+The counter IC used in this circuit has two clocks. CLKA is for Q1 and rest are controlled by CLKB. The output from Q1 was to be fed to the CLKB as an input, which will control all other bits. I figured this out very late which caused a lot of trouble and expenditure of huge time in troubleshooting the whole design.
+
+
+
