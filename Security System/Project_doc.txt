@@ -1,0 +1,61 @@
+AIM: 
+
+The aim for the give task was to make a security system. It should have a default password,'159'. On pressing '#' the system should confirm the password and either allow or deny the entry according to that.  
+On entering the wrong password, the 'Security Breach' mode gets triggered which disables the keypad for 10 seconds and blink the LED and buzzer for about 5sec. 
+If we enter the pin '359', the user enter the 'Admin Mode' from where, the user has 3 options namely,'1','2' and '3'. 
+1:Allows to reset the password 
+2:Shows the number of wrong attempts from the time we have started the system. It can go till 99. 
+3:Resets the count mention in mode 2 to 0.  
+
+Apart from this we had to connect the 8051, microcontroller to ESP32, so that we can take a note of the timestamp, when the password has been entered by the user, and is that password correct or not or if the access has been granted or not.  
+
+
+
+APPROACH:
+
+To implement this idea using a 8051 microcontroller I have used various RAM components of the microcontroller. The major thing i had to implement are given below along with the memory locations I used to perform the various functions. 
+
+a)Scrolling + Printing Text 
+  Used registers R5 and R6 for indexing and defining the number of scrolls during scrolling . For various delays registers, R1,R2 and R3 were used. 
+
+b)Scan keypad for input and displaying the acceptance or denial
+ Used register R7 for the seven segment display, R2 for counting the index of the password number, scratch memory 55H, 56H and 57H for storing first,
+ second and third digit of the password, used memory locations 35H, 36H and 37H to store the input password. Used 40H to store the wrong password counter, 
+ it gets incremented as soon as it enters the 'denied' subroutine and resets to zero when it enters the 'granted' subroutine.R4 is the universal wrong 
+ password counter which sets to zero only when the system starts and set to zero when we reset it via admin mode or turn the system off.  
+
+c)Triggering Security breach 
+  
+d)Admin mode  
+
+For the WiFi task, I have written the code to connect the Wifi to Wokwi network, for Wifi I have used "WiFi.h" library, for transferring data from 
+ESP32 to Google Spreadsheets, I have used ESP_Google_Sheet_Client and FirebaseJson library. Time library has also been used to get the current timestamp.  
+
+
+
+ALGORITHM USED:
+
+a)Scrolling 
+  Scrolling is controlled by 2 loops: print next digit(just like normal print loop), indexing loop(the print begins from 80H on LCD, after each print we 
+  increase the offset index to produce scrolling effect). numbers of scrolls are stored in R6 and counting the scrolls is in R5. After every scroll, we 
+  check if R5 and R6 are same, when they are same it means that scrolling has come to an end. 
+b)Scanning the keypad
+  We initially set all the 12 pins high. Then we set one row low out of the 4 rows. After this, when the user select any key on the keypad, both the rows 
+  and column corresponding to that key becomes low and it gets selected. The output from this is stored in R7. After every scan and select, we go to handle 
+  subroutine. The handle subroutine checks if we have selected '#' or any other key. Both of them are handled separately, if it is '#', it goes to check and 
+  declares if the stored password is right or wrong. If it is anything else than '#',it goes to store subroutine. 
+
+
+
+ISSUES ENCOUNTER AND HOW WERE THEY RESOLVED:
+
+The CJNE check in the check subroutine was not working. Instead of CJNE, I used XOR. With CJNE, it always showed ACCESS DENIED and SECURITY BREACH mode was never getting triggered.
+
+I was initially using Google Script, to connect the spreadsheet and ESP32, but it was not happening so I shifted to Google API and connection established successfully. 
+
+
+
+SCOPE OF DEVELOPMENT: 
+
+We can add, a system which calls the authority along with buzzer and blink when security breach is triggered. We can also add a power saving protocol, when the security system is not in use, the lcd, keypad turns off and turns on automatically when any key is pressed.  
+

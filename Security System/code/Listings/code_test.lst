@@ -1,0 +1,997 @@
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.2.7.0
+OBJECT MODULE PLACED IN .\Objects\code_test.obj
+ASSEMBLER INVOKED BY: C:\Keil_v5\C51\BIN\A51.EXE code_test.a51 SET(SMALL) DEBUG PRINT(.\Listings\code_test.lst) OBJECT(.
+                      \Objects\code_test.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     ORG 0000H
+                       2     ;------------------------------------------------------------------------------------------
+                             ------------------------------------------------------       
+0000 7438              3     MOV A,#38H           ;select
+0002 71F0              4     ACALL LCD_COMMAND
+0004 740E              5     MOV A,#0EH           ;display on cursor on
+0006 71F0              6     ACALL LCD_COMMAND
+0008 7401              7     MOV A,#01H           ;clear display
+000A 71F0              8     ACALL LCD_COMMAND
+                       9     ;------------------------------------------------------------------------------------------
+                             ------------------------------------------------------
+000C 755501           10     MOV 55H,#01H         ; 1st digit,value 35h
+000F 755605           11     MOV 56H,#05H         ; 2nd digit,value 36h
+0012 755709           12     MOV 57H,#09H         ; 3rd digit,value 37h
+0015 7C00             13     MOV R4,#00H         ; TOTAL ATTEMPT COUNTER;to trigger security breaCH(40H)
+                      14     ;--------------------------------------------START-----------------------------------------
+                             -------------------------------------------------------
+0017 7580FF           15     MOV P0, #11111111B   ;7 segment 
+                      16     
+001A 7D00             17     MOV R5, #00H         ;index
+001C 7E17             18     MOV R6, #23          ;scroll 
+                      19     
+001E                  20     scroll:
+001E 910F             21     ACALL delay_move
+0020 DE00             22     DJNZ R6, GO
+                      23     
+0022                  24     GO:
+0022 7480             25     MOV A, #80H
+0024 71F0             26     ACALL LCD_COMMAND
+0026 90042D           27     MOV DPTR, #String1
+0029 ED               28     MOV A, R5
+002A 2582             29     ADD A, DPL
+002C F582             30     MOV DPL, A
+002E E4               31     CLR A
+002F 3583             32     ADDC A, DPH
+0031 F583             33     MOV DPH, A
+0033 0D               34     INC R5
+0034 7B20             35     MOV R3, #32
+0036                  36     back:
+0036 E4               37     CLR A
+0037 93               38     MOVC A, @A+DPTR
+0038 6008             39     JZ EXIT
+003A 71FB             40     ACALL LCD_DATA
+003C A3               41     INC DPTR
+003D 1B               42     DEC R3
+003E DBF6             43     DJNZ R3, back
+0040 80DC             44     SJMP scroll
+                      45     
+0042                  46     EXIT:
+0042 8000             47     SJMP print
+                      48     
+0044                  49     print:
+0044 7482             50     MOV A,#82H
+0046 71F0             51     ACALL LCD_COMMAND
+0048 900449           52     MOV DPTR,#String2
+004B                  53     back2:
+004B E4               54     CLR A
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE     2
+
+004C 93               55     MOVC A,@A+DPTR
+004D 6005             56     JZ EXIT2
+004F 71FB             57     ACALL LCD_DATA
+0051 A3               58     INC DPTR
+0052 80F7             59     SJMP back2
+                      60     
+0054                  61     EXIT2:
+0054 9114             62     ACALL delay_2sec
+0056 8000             63     SJMP print2
+                      64     
+0058                  65     print2:
+0058 7481             66     MOV A,#81H
+005A 71F0             67     ACALL LCD_COMMAND
+005C 900456           68     MOV DPTR,#String3
+005F                  69     back3:
+005F E4               70     CLR A
+0060 93               71     MOVC A,@A+DPTR
+0061 6005             72     JZ EXIT3
+0063 71FB             73     ACALL LCD_DATA
+0065 A3               74     INC DPTR
+0066 80F7             75     SJMP back3
+                      76     
+0068                  77     EXIT3:
+0068 9114             78     ACALL delay_2sec
+006A 8000             79     SJMP print3
+                      80     
+006C                  81     print3:
+006C 7481             82     MOV A,#81H
+006E 71F0             83     ACALL LCD_COMMAND
+0070 900465           84     MOV DPTR,#String4
+0073                  85     back4:
+0073 E4               86     CLR A
+0074 93               87     MOVC A,@A+DPTR
+0075 6005             88     JZ LCD_INIT
+0077 71FB             89     ACALL LCD_DATA
+0079 A3               90     INC DPTR
+007A 80F7             91     SJMP back4
+                      92     
+007C                  93     LCD_INIT:
+007C 9114             94     ACALL delay_2sec
+007E 7401             95     MOV A,#01H
+0080 71F0             96     ACALL LCD_COMMAND
+0082 8000             97     SJMP KEYPAD_DISPLAY
+                      98     
+                      99     ;------------------------------------------------------------------------------------------
+                             ------------------------------------------------------
+0084                 100     KEYPAD_DISPLAY:
+0084 754000          101     MOV 40H,#00H        ; TEMPORARY Attempt counter
+0087 7A00            102     MOV R2,#00H         ; Input index
+                     103     
+0089                 104     start:
+0089 75B0FF          105     MOV P3,#0FFH
+                     106     
+008C C2B0            107     CLR P3.0
+008E 20B404          108     JB P3.4,column2_row1
+0091 7401            109     MOV A,#01H
+0093 11F2            110     ACALL handle
+                     111     
+0095                 112     column2_row1:
+0095 20B504          113     JB P3.5,column3_row1
+0098 7402            114     MOV A,#02H
+009A 11F2            115     ACALL handle
+                     116     
+009C                 117     column3_row1:
+009C 20B604          118     JB P3.6,column1_row2
+009F 7403            119     MOV A,#03H
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE     3
+
+00A1 11F2            120     ACALL handle
+                     121     
+00A3                 122     column1_row2:
+00A3 D2B0            123     SETB P3.0
+00A5 C2B1            124     CLR P3.1
+00A7 20B404          125     JB P3.4,column2_row2
+00AA 7404            126     MOV A,#04H
+00AC 11F2            127     ACALL handle
+                     128     
+00AE                 129     column2_row2:
+00AE 20B504          130     JB P3.5,column3_row2
+00B1 7405            131     MOV A,#05H
+00B3 11F2            132     ACALL handle
+                     133     
+00B5                 134     column3_row2:
+00B5 20B604          135     JB P3.6,column1_row3
+00B8 7406            136     MOV A,#06H
+00BA 11F2            137     ACALL handle
+                     138     
+00BC                 139     column1_row3:
+00BC D2B1            140     SETB P3.1
+00BE C2B2            141     CLR P3.2
+00C0 20B404          142     JB P3.4,column2_row3
+00C3 7407            143     MOV A,#07H
+00C5 11F2            144     ACALL handle
+                     145     
+00C7                 146     column2_row3:
+00C7 20B504          147     JB P3.5,column3_row3
+00CA 7408            148     MOV A,#08H
+00CC 11F2            149     ACALL handle
+                     150     
+00CE                 151     column3_row3:
+00CE 20B604          152     JB P3.6,column1_row4
+00D1 7409            153     MOV A,#09H
+00D3 11F2            154     ACALL handle
+                     155     
+00D5                 156     column1_row4:
+00D5 D2B2            157     SETB P3.2
+00D7 C2B3            158     CLR P3.3
+00D9 20B405          159     JB P3.4,column2_row4
+00DC 740A            160     MOV A,#0AH          
+00DE 08              161     INC R0
+00DF 11F2            162     ACALL handle
+                     163     
+00E1                 164     column2_row4:
+00E1 20B504          165     JB P3.5,column3_row4
+00E4 7400            166     MOV A,#00H
+00E6 11F2            167     ACALL handle
+                     168     
+00E8                 169     column3_row4:
+00E8 20B604          170     JB P3.6, J
+00EB 740B            171     MOV A,#0BH           
+00ED 11F2            172     ACALL handle
+                     173     
+00EF 020089          174     J:LJMP start
+                     175     
+                     176     ;------------------------------------------------------------------------------------------
+                             -----------------------------------------------------
+00F2                 177     handle:
+00F2 FF              178     MOV R7,A
+00F3 B40B03          179     CJNE A, #0BH, store
+00F6 313B            180     ACALL check
+00F8 22              181     RET
+                     182     
+00F9                 183     store:
+00F9 0A              184     INC R2  
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE     4
+
+00FA 8000            185     SJMP store1 
+                     186     
+00FC                 187     store1:
+00FC BA0111          188     CJNE R2, #01H, store2
+00FF F535            189     MOV 35H, A
+0101 31B1            190     ACALL display 
+0103 7480            191     MOV A,#80H 
+0105 71F0            192     ACALL LCD_COMMAND 
+0107 E535            193     MOV A,35H
+0109 2430            194     ADD A,#30H
+010B 71FB            195     ACALL LCD_DATA
+010D 9106            196     ACALL delay
+010F 22              197     RET
+                     198     
+0110                 199     store2:
+0110 BA0211          200     CJNE R2, #02H, store3
+0113 F536            201     MOV 36H, A
+0115 31B1            202     ACALL display
+0117 7481            203     MOV A,#81H 
+0119 71F0            204     ACALL LCD_COMMAND 
+011B E536            205     MOV A,36H
+011D 2430            206     ADD A,#30H
+011F 71FB            207     ACALL LCD_DATA
+0121 9106            208     ACALL delay
+0123 22              209     RET
+                     210     
+0124                 211     store3:
+0124 F537            212     MOV 37H, A
+0126 7A00            213     MOV R2, #00H
+0128 31B1            214     ACALL display
+012A 7482            215     MOV A,#82H 
+012C 71F0            216     ACALL LCD_COMMAND 
+012E E537            217     MOV A,37H
+0130 2430            218     ADD A,#30H
+0132 71FB            219     ACALL LCD_DATA
+0134 9106            220     ACALL delay
+0136 7401            221     MOV A,#01H 
+0138 71F0            222     ACALL LCD_COMMAND
+013A 22              223     RET
+                     224     
+013B                 225     check:
+013B E535            226     MOV A,35H
+013D 6403            227     XRL A,#03H 
+013F 7015            228     JNZ check2
+0141 9106            229     ACALL delay
+0143 E536            230     MOV A,36H
+0145 6405            231     XRL A,#05H 
+0147 700D            232     JNZ check2
+0149 9106            233     ACALL delay
+014B E537            234     MOV A,37H
+014D 6409            235     XRL A,#09H 
+014F 7005            236     JNZ check2 
+0151 9106            237     ACALL delay
+0153 31EE            238     ACALL admin_mode 
+0155 22              239     RET 
+                     240     
+0156                 241     check2:
+0156 E535            242     MOV A,35H
+0158 8555F0          243     MOV B,55H 
+015B 65F0            244     XRL A,B
+015D 701B            245     JNZ denied
+015F 9106            246     ACALL delay
+0161 E536            247     MOV A,36H 
+0163 8556F0          248     MOV B,56H 
+0166 65F0            249     XRL A,B
+0168 7010            250     JNZ denied
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE     5
+
+016A 9106            251     ACALL delay
+016C E537            252     MOV A,37H
+016E 8557F0          253     MOV B,57H 
+0171 65F0            254     XRL A,B 
+0173 7005            255     JNZ denied
+0175 9106            256     ACALL delay
+0177 3195            257     ACALL granted
+0179 22              258     RET
+                     259     
+017A                 260     denied:  
+017A 7A00            261     MOV R2,#00H
+017C 0C              262     INC R4                            ;WRONG ATTEMPS IN WHOLE LIFE 
+017D 0540            263     INC 40H                           ;WRONG ATTEMPTS FOR SECURITY BREACH 
+017F E540            264     MOV A,40H 
+0181 6403            265     XRL A,#3 
+0183 6034            266     JZ security_breach
+                     267     
+0185 7481            268     MOV A, #81H
+0187 71F0            269     ACALL LCD_COMMAND
+0189 900474          270     MOV DPTR, #String5
+018C                 271     denied_back:
+018C E4              272     CLR A
+018D 93              273     MOVC A, @A+DPTR
+018E 601A            274     JZ ex
+0190 71FB            275     ACALL LCD_DATA
+0192 A3              276     INC DPTR
+0193 80F7            277     SJMP denied_back
+                     278     
+0195                 279     granted:
+0195 7A00            280     MOV R2,#00H
+0197 754000          281     MOV 40H,#0
+019A 7481            282     MOV A, #81H
+019C 71F0            283     ACALL LCD_COMMAND
+019E 900482          284     MOV DPTR, #String6
+01A1                 285     granted_back:
+01A1 E4              286     CLR A
+01A2 93              287     MOVC A, @A+DPTR
+01A3 6005            288     JZ ex
+01A5 71FB            289     ACALL LCD_DATA
+01A7 A3              290     INC DPTR
+01A8 80F7            291     SJMP granted_back
+                     292     
+01AA                 293     ex:
+01AA 7401            294     MOV A, #01H
+01AC 71F0            295     ACALL LCD_COMMAND
+01AE 020089          296     LJMP start 
+                     297     ;--------------------------------------7segment--------------------------------------------
+                             -----------------------------------------------------
+01B1                 298     display:
+01B1 900421          299     MOV DPTR, #table
+01B4 EF              300     MOV A, R7
+01B5 93              301     MOVC A, @A+DPTR
+01B6 F580            302     MOV P0, A
+01B8 22              303     RET
+                     304     ;----------------------------------------SECURITY BREACH-----------------------------------
+                             ----------------------------------------------------------
+01B9                 305     security_breach:
+01B9 754000          306     MOV 40H,#0                                   
+01BC 900491          307     MOV DPTR, #String7
+01BF                 308     security_breach_back:
+01BF E4              309     CLR A
+01C0 93              310     MOVC A, @A+DPTR
+01C1 6005            311     JZ BUZZER 
+01C3 71FB            312     ACALL LCD_DATA
+01C5 A3              313     INC DPTR
+01C6 80F7            314     SJMP security_breach_back
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE     6
+
+                     315     
+01C8                 316     BUZZER: 
+01C8 C2A5            317     CLR P2.5 
+01CA 75F028          318     MOV B, #40
+01CD                 319     LOOP:
+01CD D2A4            320     SETB P2.4
+01CF 9106            321     ACALL delay
+01D1 C2A4            322     CLR P2.4
+01D3 9106            323     ACALL delay
+01D5 D5F0F5          324     DJNZ B,LOOP
+01D8 8000            325     SJMP DISABLE_KEYPAD
+                     326     
+01DA                 327     DISABLE_KEYPAD: 
+01DA 75B0FF          328     MOV P3,#0FFH 
+01DD 9114            329     ACALL delay_2sec
+01DF 9114            330     ACALL delay_2sec
+01E1 9114            331     ACALL delay_2sec
+01E3 9114            332     ACALL delay_2sec
+01E5 9114            333     ACALL delay_2sec  
+01E7 7401            334     MOV A,#01H 
+01E9 71F0            335     ACALL LCD_COMMAND 
+01EB 020084          336     LJMP KEYPAD_DISPLAY
+                     337     ;--------------------------------------------ADMINMODE-------------------------------------
+                             ----------------------------------------------------------------
+01EE                 338     admin_mode:
+01EE 7A00            339     MOV R2,#00H
+01F0 7F00            340     MOV R7,#00H                           ;USED FOR DISPLAY OF MODE ON LCD 
+01F2 90049F          341     MOV DPTR, #String8
+01F5                 342     admin_mode_back:
+01F5 E4              343     CLR A
+01F6 93              344     MOVC A, @A+DPTR
+01F7 6005            345     JZ next
+01F9 71FB            346     ACALL LCD_DATA
+01FB A3              347     INC DPTR
+01FC 80F7            348     SJMP admin_mode_back
+                     349     
+01FE                 350     next:
+01FE 9114            351     ACALL delay_2sec 
+0200 7401            352     MOV A,#01H 
+0202 71F0            353     ACALL LCD_COMMAND 
+0204 7480            354     MOV A,#80H 
+0206 71F0            355     ACALL LCD_COMMAND 
+0208 9004AA          356     MOV DPTR,#String9 
+020B                 357     next_back:
+020B E4              358     CLR A 
+020C 93              359     MOVC A,@A+DPTR 
+020D 6005            360     JZ T
+020F 71FB            361     ACALL LCD_DATA 
+0211 A3              362     INC DPTR 
+0212 80F7            363     SJMP next_back 
+                     364     
+0214 020370          365     T:LJMP SELECT_SCAN
+                     366     
+0217                 367     SELECT:  
+0217 FF              368     MOV R7,A 
+0218 7489            369     MOV A,#89H 
+021A 71F0            370     ACALL LCD_COMMAND
+021C EF              371     MOV A,R7 
+021D 2430            372     ADD A,#30H 
+021F 71FB            373     ACALL LCD_DATA
+0221 9106            374     ACALL delay 
+0223 7401            375     MOV A,#01H 
+0225 71F0            376     ACALL LCD_COMMAND 
+0227 EF              377     MOV A,R7 
+0228 6401            378     XRL A,#01H 
+022A 6012            379     JZ MODE1  
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE     7
+
+022C EF              380     MOV A,R7
+022D 6402            381     XRL A,#02H 
+022F 6007            382     JZ K 
+0231 EF              383     MOV A,R7
+0232 6403            384     XRL A,#03H 
+0234 6005            385     JZ H  
+0236 71D9            386     ACALL EXIT_ADMINMODE 
+                     387     
+0238 0202B4          388     K:LJMP MODE2 
+023B 0202E8          389     H:LJMP MODE3
+                     390     ;--------------------------------------------------MODE1-----------------------------------
+                             ---------------------------------------------------------
+023E                 391     MODE1: 
+023E 7A00            392     MOV R2,#00H                ;INDEXING
+0240 7401            393     MOV A,#01H 
+0242 71F0            394     ACALL LCD_COMMAND 
+0244 7480            395     MOV A,#80H 
+0246 71F0            396     ACALL LCD_COMMAND 
+0248 9004C3          397     MOV DPTR,#String11
+024B                 398     MODE1_BACK:
+024B E4              399     CLR A 
+024C 93              400     MOVC A,@A+DPTR 
+024D 6005            401     JZ CLEARNGO 
+024F 71FB            402     ACALL LCD_DATA 
+0251 A3              403     INC DPTR 
+0252 80F7            404     SJMP MODE1_BACK  
+                     405     
+0254                 406     CLEARNGO: 
+0254 7401            407     MOV A,#01H 
+0256 71F0            408     ACALL LCD_COMMAND 
+0258 020307          409     LJMP SCAN_PASSWORD 
+                     410     
+                     411     ;------------------------------------------------------------------------------------------
+                             ---------------------------------------------------
+025B                 412     STORE_PASSWORD: 
+025B FF              413     MOV R7,A                        ;7SEGMENT DISPLAY 
+025C 0A              414     INC R2  
+025D 8000            415     SJMP pass_store1 
+                     416     
+025F                 417     pass_store1:
+025F BA0111          418     CJNE R2, #01H,pass_store2
+0262 F555            419     MOV 55H, A
+0264 31B1            420     ACALL display 
+0266 7480            421     MOV A,#80H 
+0268 71F0            422     ACALL LCD_COMMAND 
+026A E555            423     MOV A,55H
+026C 2430            424     ADD A,#30H
+026E 71FB            425     ACALL LCD_DATA
+0270 9106            426     ACALL delay
+0272 22              427     RET
+                     428     
+0273                 429     pass_store2:
+0273 BA0211          430     CJNE R2, #02H,pass_store3
+0276 F556            431     MOV 56H, A
+0278 31B1            432     ACALL display
+027A 7481            433     MOV A,#81H 
+027C 71F0            434     ACALL LCD_COMMAND 
+027E E556            435     MOV A,56H
+0280 2430            436     ADD A,#30H
+0282 71FB            437     ACALL LCD_DATA
+0284 9106            438     ACALL delay
+0286 22              439     RET
+                     440     
+0287                 441     pass_store3:
+0287 F557            442     MOV 57H, A
+0289 7A00            443     MOV R2, #00H
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE     8
+
+028B 31B1            444     ACALL display
+028D 7482            445     MOV A,#82H 
+028F 71F0            446     ACALL LCD_COMMAND 
+0291 E557            447     MOV A,57H
+0293 2430            448     ADD A,#30H
+0295 71FB            449     ACALL LCD_DATA
+0297 9106            450     ACALL delay
+0299 7401            451     MOV A,#01H 
+029B 71F0            452     ACALL LCD_COMMAND  
+029D 7480            453     MOV A,#80H 
+029F 71F0            454     ACALL LCD_COMMAND 
+02A1 9004EB          455     MOV DPTR,#String14 
+02A4                 456     PASS_SET_BACK:
+02A4 E4              457     CLR A
+02A5 93              458     MOVC A,@A+DPTR 
+02A6 6005            459     JZ TEXTCLEAR
+02A8 71FB            460     ACALL LCD_DATA 
+02AA A3              461     INC DPTR 
+02AB 80F7            462     SJMP PASS_SET_BACK 
+                     463     
+02AD                 464     TEXTCLEAR: 
+02AD 7401            465     MOV A,#01H 
+02AF 71F0            466     ACALL LCD_COMMAND 
+02B1 0201FE          467     LJMP next 
+                     468     
+                     469     ;-----------------------------------------------MODE2--------------------------------------
+                             ------------------------------------------------------
+02B4                 470     MODE2: 
+02B4 7401            471     MOV A,#01H 
+02B6 71F0            472     ACALL LCD_COMMAND 
+02B8 7480            473     MOV A,#80H 
+02BA 71F0            474     ACALL LCD_COMMAND 
+02BC 9004D0          475     MOV DPTR,#String12 
+02BF                 476     MODE2_BACK:
+02BF E4              477     CLR A 
+02C0 93              478     MOVC A,@A+DPTR 
+02C1 6005            479     JZ NOA 
+02C3 71FB            480     ACALL LCD_DATA 
+02C5 A3              481     INC DPTR 
+02C6 80F7            482     SJMP MODE2_BACK 
+                     483     
+02C8                 484     NOA:                      ;ASSUMING MAX UNIVERSAL WRONG ATTEMPT TO BE 99 
+02C8 748B            485     MOV A,#8BH 
+02CA 71F0            486     ACALL LCD_COMMAND 
+02CC EC              487     MOV A,R4 
+02CD 75F00A          488     MOV B,#10                  ;A,QUOTIENT , B ,REMAINDER 
+02D0 84              489     DIV AB 
+02D1 2430            490     ADD A,#30H 
+02D3 71FB            491     ACALL LCD_DATA 
+02D5 748C            492     MOV A,#8CH 
+02D7 71F0            493     ACALL LCD_COMMAND 
+02D9 E5F0            494     MOV A,B  
+02DB 2430            495     ADD A,#30H 
+02DD 71FB            496     ACALL LCD_DATA 
+02DF 9114            497     ACALL delay_2sec 
+02E1 7401            498     MOV A,#01H 
+02E3 71F0            499     ACALL LCD_COMMAND 
+02E5 0201FE          500     LJMP next 
+                     501     ;-----------------------------------------------------------------MODE3--------------------
+                             ----------------------------------------------------
+02E8                 502     MODE3: 
+02E8 7C00            503     MOV R4,#00H
+02EA 7401            504     MOV A,#01H 
+02EC 71F0            505     ACALL LCD_COMMAND 
+02EE 7480            506     MOV A,#80H 
+02F0 71F0            507     ACALL LCD_COMMAND 
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE     9
+
+02F2 9004DC          508     MOV DPTR,#String13 
+02F5                 509     MODE3_BACK:
+02F5 E4              510     CLR A
+02F6 93              511     MOVC A,@A+DPTR 
+02F7 6005            512     JZ EXIT_MODE3 
+02F9 71FB            513     ACALL LCD_DATA 
+02FB A3              514     INC DPTR 
+02FC 80F7            515     SJMP MODE3_BACK 
+                     516     
+02FE                 517     EXIT_MODE3:
+02FE 9114            518     ACALL delay_2sec 
+0300 7401            519     MOV A,#01H 
+0302 71F0            520     ACALL LCD_COMMAND 
+0304 0201FE          521     LJMP next 
+                     522     
+                     523     ;------------------------------------------------------------------------------------------
+                             ----------------------------------------------------
+0307                 524     SCAN_PASSWORD: 
+0307 75B0FF          525     MOV P3,#0FFH
+                     526     
+030A C2B0            527     CLR P3.0
+030C 20B404          528     JB P3.4,c2r1
+030F 7401            529     MOV A,#01H
+0311 515B            530     ACALL STORE_PASSWORD
+                     531     
+0313                 532     c2r1:
+0313 20B504          533     JB P3.5,c3r1
+0316 7402            534     MOV A,#02H
+0318 515B            535     ACALL STORE_PASSWORD
+                     536     
+031A                 537     c3r1:
+031A 20B604          538     JB P3.6,c1r2
+031D 7403            539     MOV A,#03H
+031F 515B            540     ACALL STORE_PASSWORD
+                     541     
+0321                 542     c1r2:
+0321 D2B0            543     SETB P3.0
+0323 C2B1            544     CLR P3.1
+0325 20B404          545     JB P3.4,c2r2
+0328 7404            546     MOV A,#04H
+032A 515B            547     ACALL STORE_PASSWORD
+                     548     
+032C                 549     c2r2:
+032C 20B504          550     JB P3.5,c3r2
+032F 7405            551     MOV A,#05H
+0331 515B            552     ACALL STORE_PASSWORD
+                     553     
+0333                 554     c3r2:
+0333 20B604          555     JB P3.6,c1r3
+0336 7406            556     MOV A,#06H
+0338 515B            557     ACALL STORE_PASSWORD
+                     558     
+033A                 559     c1r3:
+033A D2B1            560     SETB P3.1
+033C C2B2            561     CLR P3.2
+033E 20B404          562     JB P3.4,c2r3
+0341 7407            563     MOV A,#07H
+0343 515B            564     ACALL STORE_PASSWORD
+                     565     
+0345                 566     c2r3:
+0345 20B504          567     JB P3.5,c3r3
+0348 7408            568     MOV A,#08H
+034A 515B            569     ACALL STORE_PASSWORD
+                     570     
+034C                 571     c3r3:
+034C 20B604          572     JB P3.6,c1r4
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE    10
+
+034F 7409            573     MOV A,#09H
+0351 515B            574     ACALL STORE_PASSWORD
+                     575     
+0353                 576     c1r4:
+0353 D2B2            577     SETB P3.2
+0355 C2B3            578     CLR P3.3
+0357 20B405          579     JB P3.4,c2r4
+035A 740A            580     MOV A,#0AH          
+035C 08              581     INC R0
+035D 515B            582     ACALL STORE_PASSWORD
+                     583     
+035F                 584     c2r4:
+035F 20B504          585     JB P3.5,c3r4
+0362 7400            586     MOV A,#00H
+0364 515B            587     ACALL STORE_PASSWORD
+                     588     
+0366                 589     c3r4:
+0366 20B604          590     JB P3.6,EFG
+0369 740B            591     MOV A,#0BH           
+036B 515B            592     ACALL STORE_PASSWORD
+                     593     
+036D                 594     EFG: 
+036D 020307          595     LJMP SCAN_PASSWORD 
+                     596     ;------------------------------------------------------------------------------------------
+                             ------------------------------------------------------
+0370                 597     SELECT_SCAN:
+                     598     
+0370 75B0FF          599     MOV P3,#0FFH
+                     600     
+0373 C2B0            601     CLR P3.0
+0375 20B404          602     JB P3.4,c2_r1
+0378 7401            603     MOV A,#01H
+037A 5117            604     ACALL SELECT
+                     605     
+037C                 606     c2_r1:
+037C 20B504          607     JB P3.5,c3_r1
+037F 7402            608     MOV A,#02H
+0381 5117            609     ACALL SELECT
+                     610     
+0383                 611     c3_r1:
+0383 20B604          612     JB P3.6,c1_r2
+0386 7403            613     MOV A,#03H
+0388 5117            614     ACALL SELECT
+                     615     
+038A                 616     c1_r2:
+038A D2B0            617     SETB P3.0
+038C C2B1            618     CLR P3.1
+038E 20B404          619     JB P3.4,c2_r2
+0391 7404            620     MOV A,#04H
+0393 5117            621     ACALL SELECT
+                     622     
+0395                 623     c2_r2:
+0395 20B504          624     JB P3.5,c3_r2
+0398 7405            625     MOV A,#05H
+039A 5117            626     ACALL SELECT
+                     627     
+039C                 628     c3_r2:
+039C 20B604          629     JB P3.6,c1_r3
+039F 7406            630     MOV A,#06H
+03A1 5117            631     ACALL SELECT
+                     632     
+03A3                 633     c1_r3:
+03A3 D2B1            634     SETB P3.1
+03A5 C2B2            635     CLR P3.2
+03A7 20B404          636     JB P3.4,c2_r3
+03AA 7407            637     MOV A,#07H
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE    11
+
+03AC 5117            638     ACALL SELECT
+                     639     
+03AE                 640     c2_r3:
+03AE 20B504          641     JB P3.5,c3_r3
+03B1 7408            642     MOV A,#08H
+03B3 5117            643     ACALL SELECT
+                     644     
+03B5                 645     c3_r3:
+03B5 20B604          646     JB P3.6,c1_r4
+03B8 7409            647     MOV A,#09H
+03BA 5117            648     ACALL SELECT
+                     649     
+03BC                 650     c1_r4:
+03BC D2B2            651     SETB P3.2
+03BE C2B3            652     CLR P3.3
+03C0 20B405          653     JB P3.4,c2_r4
+03C3 740A            654     MOV A,#0AH          
+03C5 08              655     INC R0
+03C6 5117            656     ACALL SELECT
+                     657     
+03C8                 658     c2_r4:
+03C8 20B504          659     JB P3.5,c3_r4
+03CB 7400            660     MOV A,#00H
+03CD 5117            661     ACALL SELECT
+                     662     
+03CF                 663     c3_r4:
+03CF 20B604          664     JB P3.6, G
+03D2 740B            665     MOV A,#0BH           
+03D4 5117            666     ACALL SELECT
+                     667     
+03D6 020370          668     G: LJMP SELECT_SCAN
+                     669     ;------------------------------------------------------------------------------------------
+                             ------------------------------------------------------
+03D9                 670     EXIT_ADMINMODE: 
+03D9 7481            671     MOV A,#81H 
+03DB 71F0            672     ACALL LCD_COMMAND 
+03DD 9004B3          673     MOV DPTR,#String10 
+03E0                 674     EXIT_ADMINMODE_BACK:
+03E0 E4              675     CLR A
+03E1 93              676     MOVC A,@A+DPTR 
+03E2 6005            677     JZ TARGETOUTOFRANGE
+03E4 71FB            678     ACALL LCD_DATA 
+03E6 A3              679     INC DPTR 
+03E7 80F7            680     SJMP EXIT_ADMINMODE_BACK
+                     681     
+03E9                 682     TARGETOUTOFRANGE:
+03E9 7401            683     MOV A,#01H 
+03EB 71F0            684     ACALL LCD_COMMAND 
+03ED 02006C          685     LJMP print3 
+                     686     ;------------------------------------------------------------------------------------------
+                             -----------------------------------------------------
+03F0                 687     LCD_COMMAND:
+03F0 9106            688     ACALL delay
+03F2 F590            689     MOV P1, A
+03F4 C2A1            690     CLR P2.1
+03F6 D2A3            691     SETB P2.3
+03F8 C2A3            692     CLR P2.3
+03FA 22              693     RET
+                     694     
+03FB                 695     LCD_DATA:
+03FB 9106            696     ACALL delay
+03FD F590            697     MOV P1, A
+03FF D2A1            698     SETB P2.1
+0401 D2A3            699     SETB P2.3
+0403 C2A3            700     CLR P2.3
+0405 22              701     RET
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE    12
+
+                     702     
+0406                 703     delay:
+0406 78FF            704     MOV R0, #0FFH
+0408 79FF            705     L2: MOV R1, #0FFH
+040A D9FE            706     L3: DJNZ R1, L3
+040C D8FA            707     DJNZ R0, L2
+040E 22              708     RET
+                     709     
+040F                 710     delay_move:
+040F 7805            711     MOV R0, #05H
+0411 D8FE            712     L1: DJNZ R0, L1
+0413 22              713     RET
+                     714     
+0414                 715     delay_2sec:
+0414 7BC8            716     MOV R3, #200
+0416                 717     OUTER_LOOP:
+0416 7AFA            718     MOV R2, #250
+0418                 719     MIDDLE_LOOP:
+0418 7928            720     MOV R1, #40
+041A                 721     INNER_LOOP:
+041A D9FE            722     DJNZ R1, INNER_LOOP
+041C DAFA            723     DJNZ R2, MIDDLE_LOOP
+041E DBF6            724     DJNZ R3, OUTER_LOOP
+0420 22              725     RET  
+                     726     
+                     727     
+0421                 728     table:
+0421 40              729     DB 1000000B  ;0
+0422 79              730     DB 1111001B  ;1
+0423 24              731     DB 0100100B  ;2
+0424 30              732     DB 0110000B  ;3
+0425 19              733     DB 0011001B  ;4
+0426 12              734     DB 0010010B  ;5
+0427 02              735     DB 0000010B  ;6
+0428 78              736     DB 1111000B  ;7
+0429 00              737     DB 0000000B  ;8
+042A 10              738     DB 0010000B  ;9
+042B 3F              739     DB 0111111B  ;A 
+042C 3F              740     DB 0111111B  ;B 
+                     741     
+042D 57454C43        742     String1: DB "WELCOME       INITIALISING ", 0
+0431 4F4D4520                
+0435 20202020                
+0439 2020494E                
+043D 49544941                
+0441 4C495349                
+0445 4E472000                
+0449 2E2E2E2E        743     String2: DB "............", 0
+044D 2E2E2E2E                
+0451 2E2E2E2E                
+0455 00                      
+0456 53414645        744     String3: DB "SAFETY CONSOLE", 0
+045A 54592043                
+045E 4F4E534F                
+0462 4C4500                  
+0465 454E5445        745     String4: DB "ENTER PASSWORD", 0
+0469 52205041                
+046D 5353574F                
+0471 524400                  
+0474 41434345        746     String5: DB "ACCESS DENIED", 0
+0478 53532044                
+047C 454E4945                
+0480 4400                    
+0482 41434345        747     String6: DB "ACCESS GRANTED", 0
+0486 53532047                
+048A 52414E54                
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE    13
+
+048E 454400                  
+0491 53595354        748     String7: DB "SYSTEM LOCKED", 0
+0495 454D204C                
+0499 4F434B45                
+049D 4400                    
+049F 41444D49        749     String8: DB "ADMIN MODE",0 
+04A3 4E204D4F                
+04A7 444500                  
+04AA 50494E4D        750     String9: DB "PINMODE:",0
+04AE 4F44453A                
+04B2 00                      
+04B3 45584954        751     String10: DB "EXIT ADMIN MODE",0  
+04B7 2041444D                
+04BB 494E204D                
+04BF 4F444500                
+04C3 53455420        752     String11: DB "SET PASSWORD",0 
+04C7 50415353                
+04CB 574F5244                
+04CF 00                      
+04D0 58204154        753     String12: DB "X ATTEMPTS ",0
+04D4 54454D50                
+04D8 54532000                
+04DC 52455345        754     String13: DB "RESET ATTEMPTS",0 
+04E0 54204154                
+04E4 54454D50                
+04E8 545300                  
+04EB 50415353        755     String14: DB "PASSWORD STORED",0 
+04EF 574F5244                
+04F3 2053544F                
+04F7 52454400                
+                     756             
+                     757     END
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE    14
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E               T Y P E  V A L U E   ATTRIBUTES
+
+ADMIN_MODE . . . . .  C ADDR   01EEH   A   
+ADMIN_MODE_BACK. . .  C ADDR   01F5H   A   
+B. . . . . . . . . .  D ADDR   00F0H   A   
+BACK . . . . . . . .  C ADDR   0036H   A   
+BACK2. . . . . . . .  C ADDR   004BH   A   
+BACK3. . . . . . . .  C ADDR   005FH   A   
+BACK4. . . . . . . .  C ADDR   0073H   A   
+BUZZER . . . . . . .  C ADDR   01C8H   A   
+C1R2 . . . . . . . .  C ADDR   0321H   A   
+C1R3 . . . . . . . .  C ADDR   033AH   A   
+C1R4 . . . . . . . .  C ADDR   0353H   A   
+C1_R2. . . . . . . .  C ADDR   038AH   A   
+C1_R3. . . . . . . .  C ADDR   03A3H   A   
+C1_R4. . . . . . . .  C ADDR   03BCH   A   
+C2R1 . . . . . . . .  C ADDR   0313H   A   
+C2R2 . . . . . . . .  C ADDR   032CH   A   
+C2R3 . . . . . . . .  C ADDR   0345H   A   
+C2R4 . . . . . . . .  C ADDR   035FH   A   
+C2_R1. . . . . . . .  C ADDR   037CH   A   
+C2_R2. . . . . . . .  C ADDR   0395H   A   
+C2_R3. . . . . . . .  C ADDR   03AEH   A   
+C2_R4. . . . . . . .  C ADDR   03C8H   A   
+C3R1 . . . . . . . .  C ADDR   031AH   A   
+C3R2 . . . . . . . .  C ADDR   0333H   A   
+C3R3 . . . . . . . .  C ADDR   034CH   A   
+C3R4 . . . . . . . .  C ADDR   0366H   A   
+C3_R1. . . . . . . .  C ADDR   0383H   A   
+C3_R2. . . . . . . .  C ADDR   039CH   A   
+C3_R3. . . . . . . .  C ADDR   03B5H   A   
+C3_R4. . . . . . . .  C ADDR   03CFH   A   
+CHECK. . . . . . . .  C ADDR   013BH   A   
+CHECK2 . . . . . . .  C ADDR   0156H   A   
+CLEARNGO . . . . . .  C ADDR   0254H   A   
+COLUMN1_ROW2 . . . .  C ADDR   00A3H   A   
+COLUMN1_ROW3 . . . .  C ADDR   00BCH   A   
+COLUMN1_ROW4 . . . .  C ADDR   00D5H   A   
+COLUMN2_ROW1 . . . .  C ADDR   0095H   A   
+COLUMN2_ROW2 . . . .  C ADDR   00AEH   A   
+COLUMN2_ROW3 . . . .  C ADDR   00C7H   A   
+COLUMN2_ROW4 . . . .  C ADDR   00E1H   A   
+COLUMN3_ROW1 . . . .  C ADDR   009CH   A   
+COLUMN3_ROW2 . . . .  C ADDR   00B5H   A   
+COLUMN3_ROW3 . . . .  C ADDR   00CEH   A   
+COLUMN3_ROW4 . . . .  C ADDR   00E8H   A   
+DELAY. . . . . . . .  C ADDR   0406H   A   
+DELAY_2SEC . . . . .  C ADDR   0414H   A   
+DELAY_MOVE . . . . .  C ADDR   040FH   A   
+DENIED . . . . . . .  C ADDR   017AH   A   
+DENIED_BACK. . . . .  C ADDR   018CH   A   
+DISABLE_KEYPAD . . .  C ADDR   01DAH   A   
+DISPLAY. . . . . . .  C ADDR   01B1H   A   
+DPH. . . . . . . . .  D ADDR   0083H   A   
+DPL. . . . . . . . .  D ADDR   0082H   A   
+EFG. . . . . . . . .  C ADDR   036DH   A   
+EX . . . . . . . . .  C ADDR   01AAH   A   
+EXIT . . . . . . . .  C ADDR   0042H   A   
+EXIT2. . . . . . . .  C ADDR   0054H   A   
+EXIT3. . . . . . . .  C ADDR   0068H   A   
+EXIT_ADMINMODE . . .  C ADDR   03D9H   A   
+EXIT_ADMINMODE_BACK.  C ADDR   03E0H   A   
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE    15
+
+EXIT_MODE3 . . . . .  C ADDR   02FEH   A   
+G. . . . . . . . . .  C ADDR   03D6H   A   
+GO . . . . . . . . .  C ADDR   0022H   A   
+GRANTED. . . . . . .  C ADDR   0195H   A   
+GRANTED_BACK . . . .  C ADDR   01A1H   A   
+H. . . . . . . . . .  C ADDR   023BH   A   
+HANDLE . . . . . . .  C ADDR   00F2H   A   
+INNER_LOOP . . . . .  C ADDR   041AH   A   
+J. . . . . . . . . .  C ADDR   00EFH   A   
+K. . . . . . . . . .  C ADDR   0238H   A   
+KEYPAD_DISPLAY . . .  C ADDR   0084H   A   
+L1 . . . . . . . . .  C ADDR   0411H   A   
+L2 . . . . . . . . .  C ADDR   0408H   A   
+L3 . . . . . . . . .  C ADDR   040AH   A   
+LCD_COMMAND. . . . .  C ADDR   03F0H   A   
+LCD_DATA . . . . . .  C ADDR   03FBH   A   
+LCD_INIT . . . . . .  C ADDR   007CH   A   
+LOOP . . . . . . . .  C ADDR   01CDH   A   
+MIDDLE_LOOP. . . . .  C ADDR   0418H   A   
+MODE1. . . . . . . .  C ADDR   023EH   A   
+MODE1_BACK . . . . .  C ADDR   024BH   A   
+MODE2. . . . . . . .  C ADDR   02B4H   A   
+MODE2_BACK . . . . .  C ADDR   02BFH   A   
+MODE3. . . . . . . .  C ADDR   02E8H   A   
+MODE3_BACK . . . . .  C ADDR   02F5H   A   
+NEXT . . . . . . . .  C ADDR   01FEH   A   
+NEXT_BACK. . . . . .  C ADDR   020BH   A   
+NOA. . . . . . . . .  C ADDR   02C8H   A   
+OUTER_LOOP . . . . .  C ADDR   0416H   A   
+P0 . . . . . . . . .  D ADDR   0080H   A   
+P1 . . . . . . . . .  D ADDR   0090H   A   
+P2 . . . . . . . . .  D ADDR   00A0H   A   
+P3 . . . . . . . . .  D ADDR   00B0H   A   
+PASS_SET_BACK. . . .  C ADDR   02A4H   A   
+PASS_STORE1. . . . .  C ADDR   025FH   A   
+PASS_STORE2. . . . .  C ADDR   0273H   A   
+PASS_STORE3. . . . .  C ADDR   0287H   A   
+PRINT. . . . . . . .  C ADDR   0044H   A   
+PRINT2 . . . . . . .  C ADDR   0058H   A   
+PRINT3 . . . . . . .  C ADDR   006CH   A   
+SCAN_PASSWORD. . . .  C ADDR   0307H   A   
+SCROLL . . . . . . .  C ADDR   001EH   A   
+SECURITY_BREACH. . .  C ADDR   01B9H   A   
+SECURITY_BREACH_BACK  C ADDR   01BFH   A   
+SELECT . . . . . . .  C ADDR   0217H   A   
+SELECT_SCAN. . . . .  C ADDR   0370H   A   
+START. . . . . . . .  C ADDR   0089H   A   
+STORE. . . . . . . .  C ADDR   00F9H   A   
+STORE1 . . . . . . .  C ADDR   00FCH   A   
+STORE2 . . . . . . .  C ADDR   0110H   A   
+STORE3 . . . . . . .  C ADDR   0124H   A   
+STORE_PASSWORD . . .  C ADDR   025BH   A   
+STRING1. . . . . . .  C ADDR   042DH   A   
+STRING10 . . . . . .  C ADDR   04B3H   A   
+STRING11 . . . . . .  C ADDR   04C3H   A   
+STRING12 . . . . . .  C ADDR   04D0H   A   
+STRING13 . . . . . .  C ADDR   04DCH   A   
+STRING14 . . . . . .  C ADDR   04EBH   A   
+STRING2. . . . . . .  C ADDR   0449H   A   
+STRING3. . . . . . .  C ADDR   0456H   A   
+STRING4. . . . . . .  C ADDR   0465H   A   
+STRING5. . . . . . .  C ADDR   0474H   A   
+STRING6. . . . . . .  C ADDR   0482H   A   
+STRING7. . . . . . .  C ADDR   0491H   A   
+STRING8. . . . . . .  C ADDR   049FH   A   
+STRING9. . . . . . .  C ADDR   04AAH   A   
+A51 MACRO ASSEMBLER  CODE_TEST                                                            07/02/2025 18:18:32 PAGE    16
+
+T. . . . . . . . . .  C ADDR   0214H   A   
+TABLE. . . . . . . .  C ADDR   0421H   A   
+TARGETOUTOFRANGE . .  C ADDR   03E9H   A   
+TEXTCLEAR. . . . . .  C ADDR   02ADH   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)
