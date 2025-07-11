@@ -1,0 +1,21 @@
+AIM AND APPROACH 
+
+The aim of this project is to count the number of active stations, or practically speaking, we had to make a digital counter. The output of the counter(i.e.. number of active station) was then to be displayed on a seven segment display. 
+
+The approach, was to first generate a D-pattern sequence which was send as an input to the 4 bit counter circuit, made using D flip flops. After this, the digital output was fed as an input to the binary to 7 segment display encoder, which was finally connected to the display. 
+
+
+TESTCASES FAILED 
+
+The circuit, is a 4 bit counter so it can count up to a maximum of 15 and we attached the output to a seven segment encoder. So, when the counter counts something greater than 1001, we will get undefined output from the display. 
+
+
+SCOPE OF DEVELOPMENT 
+
+The seven segment display can be cascaded for displaying more than 9 highs. Though the test sequence (i.e. 0111 1010 0101 1010) had only 9 bits which were high, so only 1 display was enough in this case. 
+
+
+ISSUES ENCOUNTERED AND METHODS OF SOLVING
+
+Initially I tried to make the circuit using a counter IC, with a seven segment encoder for common cathode display. This configuration was not working even after several tries, because the ground was not set common.  
+
